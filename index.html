@@ -1,27 +1,923 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr. Quantum Reality Simulator</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time-Light Consciousness Reality Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0c1a, #1a1d3a);
+            color: #e6e9ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background: rgba(10, 12, 25, 0.95);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #4a86e8;
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(90deg, #4a86e8, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #a0b0c7;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .simulation-area {
+            flex: 1;
+            min-height: 70vh;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #threeCanvas {
+            flex: 1;
+            display: block;
+        }
+        
+        .theory-panel {
+            width: 400px;
+            background: rgba(20, 25, 50, 0.85);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid #3a66b8;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        
+        .theory-section {
+            margin-bottom: 1.8rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #2a3a70;
+        }
+        
+        h2 {
+            color: #4a86e8;
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        h3 {
+            color: #9b59b6;
+            margin: 1rem 0 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .equation {
+            background: rgba(30, 35, 60, 0.7);
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin: 0.8rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        p {
+            line-height: 1.7;
+            margin-bottom: 0.8rem;
+            color: #c0c8e0;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(15, 20, 40, 0.9);
+            border-top: 1px solid #3a66b8;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        label {
+            margin-bottom: 0.5rem;
+            color: #9b59b6;
+            font-weight: 500;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .value-display {
+            font-family: 'Courier New', monospace;
+            color: #4a86e8;
+            font-size: 1.1rem;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #4a86e8, #9b59b6);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 134, 232, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 134, 232, 0.6);
+        }
+        
+        .status-display {
+            background: rgba(30, 40, 70, 0.7);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            color: #9b59b6;
+            min-height: 80px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .time-color { background: #4a86e8; }
+        .light-color { background: #f1c40f; }
+        .electron-color { background: #2ecc71; }
+        .dna-color { background: #9b59b6; }
+        .heart-color { background: #e74c3c; }
+        
+        .phase-indicator {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(30, 40, 70, 0.7);
+            border-radius: 8px;
+        }
+        
+        .phase-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #4a86e8, #9b59b6, #f1c40f);
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        
+        .phase-marker {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: white;
+            top: -5px;
+            transform: translateX(-50%);
+        }
+        
+        .validation-section {
+            background: rgba(20, 25, 50, 0.85);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem;
+            border: 1px solid #3a66b8;
+        }
+        
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .validation-card {
+            background: rgba(30, 40, 70, 0.6);
+            padding: 1.2rem;
+            border-radius: 10px;
+            border-left: 4px solid #4a86e8;
+        }
+        
+        .validation-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .confirmed { background: #2ecc71; }
+        .partial { background: #f1c40f; }
+        .pending { background: #e74c3c; }
+        
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+            .theory-panel {
+                width: 100%;
+                max-height: 40vh;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>🔮 Dr. Quantum's Reality Simulator</h1>
-    <p>Experience harmonic time-electron emergence.</p>
-  </header>
+    <header>
+        <h1>Time-Light Consciousness Reality Simulator</h1>
+        <p class="subtitle">Interactive visualization of the quantum foundations of reality, consciousness, and biological systems</p>
+    </header>
+    
+    <div class="container">
+        <div class="simulation-area">
+            <canvas id="threeCanvas"></canvas>
+            
+            <div class="phase-indicator">
+                <h3>System Phase State</h3>
+                <div class="phase-bar">
+                    <div class="phase-marker" id="phaseMarker"></div>
+                </div>
+                <div class="value-display" id="phaseDisplay">Primordial State (Ψ₀)</div>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="color-box time-color"></div>
+                    <span>Time (T)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box light-color"></div>
+                    <span>Light (L)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box electron-color"></div>
+                    <span>Electrons (ψ)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box dna-color"></div>
+                    <span>DNA Helix</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box heart-color"></div>
+                    <span>Heart Rhythm</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="theory-panel">
+            <div class="theory-section">
+                <h2>⏳ Primordial State</h2>
+                <div class="equation">Ψ₀ = {∅ | all possibilities exist simultaneously}</div>
+                <p>The zero state of pure potential before time begins its recursive process.</p>
+            </div>
+            
+            <div class="theory-section">
+                <h2>⚡ Time-Light Recursion</h2>
+                <div class="equation">Ψₙ₊₁ = T[Ψₙ] + L[Ψₙ] + R(Ψₙ)</div>
+                <p>Time (T) disturbs pure potential, creating light (L) through recursive processes.</p>
+                
+                <h3>Quantum Electron State</h3>
+                <div class="equation">d²ψ/dt² + ωₑ²ψ = F(t)</div>
+                <p>Electron wavefunction as a driven quantum oscillator, with F(t) being the time-tick driving force.</p>
+            </div>
+            
+            <div class="theory-section">
+                <h2>🌀 Electron Consciousness</h2>
+                <div class="equation">ψ(t) = A(t) · e^(iωₑt)</div>
+                <div class="equation">A(t) = A₀ cos(ωₕt)</div>
+                <p>Electron state modulated by biological rhythms (heartbeat frequency ωₕ).</p>
+                
+                <h3>Hierarchical Frequency Resonance</h3>
+                <div class="equation">f₀ (THz) → ωₑ (PHz) → ωₕ (Hz)</div>
+                <p>Quantum time ticks resonate through electron orbitals to biological rhythms.</p>
+            </div>
+            
+            <div class="theory-section">
+                <h2>🧬 DNA as Time-Light Encoding</h2>
+                <div class="equation">DNA_helix = ∫[T(t) × L(t)]dt</div>
+                <p>DNA structure as physical manifestation of time-light recursion in molecular bonds.</p>
+                
+                <h3>Cancer as Quantum Decoherence</h3>
+                <div class="equation">C(t) = ψ_disconnected(t) × e^(λt)</div>
+                <p>Exponential growth when quantum coherence breaks down.</p>
+            </div>
+            
+            <div class="status-display" id="statusDisplay">
+                System Status: Primordial state Ψ₀. Time ticks initiating recursion...
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="timeTick">Time Tick Frequency (f₀)</label>
+            <input type="range" id="timeTick" min="1" max="100" value="37">
+            <div class="value-display" id="timeTickValue">37.8 THz</div>
+        </div>
+        
+        <div class="control-group">
+            <label for="lightEnergy">Light Energy (L)</label>
+            <input type="range" id="lightEnergy" min="10" max="100" value="70">
+            <div class="value-display" id="lightEnergyValue">70%</div>
+        </div>
+        
+        <div class="control-group">
+            <label for="heartRate">Heart Rhythm (ωₕ)</label>
+            <input type="range" id="heartRate" min="40" max="120" value="72">
+            <div class="value-display" id="heartRateValue">72 BPM</div>
+        </div>
+        
+        <div class="control-group">
+            <label for="quantumCoherence">Quantum Coherence</label>
+            <input type="range" id="quantumCoherence" min="0" max="100" value="85">
+            <div class="value-display" id="coherenceValue">85%</div>
+        </div>
+        
+        <button id="observeBtn">
+            <span>👁️</span> Apply Observer Effect
+        </button>
+        
+        <button id="resetBtn">
+            <span>🔄</span> Reset Simulation
+        </button>
+        
+        <button id="quantumBtn">
+            <span>⚛️</span> Quantum Therapy
+        </button>
+    </div>
+    
+    <div class="validation-section">
+        <h2>Scientific Validation Status</h2>
+        <div class="validation-grid">
+            <div class="validation-card">
+                <h3><span class="status-indicator confirmed"></span>Time-Light Codependency</h3>
+                <p>∂T/∂L = ∂L/∂T = 1</p>
+                <p>Confirmed by special relativity</p>
+            </div>
+            
+            <div class="validation-card">
+                <h3><span class="status-indicator confirmed"></span>DNA THz Resonance</h3>
+                <p>Resonant absorption at 37.8 THz</p>
+                <p>Confirmed by spectroscopy</p>
+            </div>
+            
+            <div class="validation-card">
+                <h3><span class="status-indicator partial"></span>Electron-Heart Coherence</h3>
+                <p>Cardiac quantum coherence patterns</p>
+                <p>Preliminary evidence in studies</p>
+            </div>
+            
+            <div class="validation-card">
+                <h3><span class="status-indicator partial"></span>Cancer Decoherence</h3>
+                <p>Loss of quantum coherence in cancer</p>
+                <p>Mitochondrial studies show evidence</p>
+            </div>
+            
+            <div class="validation-card">
+                <h3><span class="status-indicator pending"></span>Observer Effect</h3>
+                <p>Consciousness influences quantum states</p>
+                <p>Experimental validation ongoing</p>
+            </div>
+            
+            <div class="validation-card">
+                <h3><span class="status-indicator partial"></span>Hierarchical Resonance</h3>
+                <p>f₀ → ωₑ → ωₕ frequency scaling</p>
+                <p>EEG data shows harmonic relationships</p>
+            </div>
+        </div>
+    </div>
 
-  <main>
-    <canvas id="simCanvas"></canvas>
-    <button id="donateButton">🧬 Support the Mission</button>
-  </main>
-
-  <footer>
-    <p>Created by <strong>Dr. Quantum (Nile Green)</strong> — All insights protected by divine law & IP law.</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <script>
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0c1a);
+        scene.fog = new THREE.Fog(0x0a0c1a, 10, 100);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+        
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.getElementById('threeCanvas'),
+            antialias: true
+        });
+        renderer.setSize(document.querySelector('.simulation-area').offsetWidth, 
+                        document.querySelector('.simulation-area').offsetHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0x333366);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xf1c40f, 1, 100);
+        pointLight.position.set(10, 20, 15);
+        scene.add(pointLight);
+        
+        const pointLight2 = new THREE.PointLight(0x4a86e8, 1, 100);
+        pointLight2.position.set(-10, -20, -15);
+        scene.add(pointLight2);
+        
+        // Create visualization objects
+        const timeTicks = new THREE.Group();
+        const lightParticles = new THREE.Group();
+        const electronField = new THREE.Group();
+        const dnaHelix = new THREE.Group();
+        const heartRhythm = new THREE.Group();
+        
+        scene.add(timeTicks);
+        scene.add(lightParticles);
+        scene.add(electronField);
+        scene.add(dnaHelix);
+        scene.add(heartRhythm);
+        
+        // Create a central sphere for primordial state
+        const primordialSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(5, 32, 32),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x9b59b6,
+                emissive: 0x4a1a6c,
+                metalness: 0.7,
+                roughness: 0.3,
+                transparent: true,
+                opacity: 0.9
+            })
+        );
+        scene.add(primordialSphere);
+        
+        // Create time ticks (pulses)
+        function createTimeTicks() {
+            timeTicks.clear();
+            
+            const count = 20;
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                const radius = 15;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                const tick = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.5, 0.5, 0.5),
+                    new THREE.MeshBasicMaterial({ color: 0x4a86e8 })
+                );
+                tick.position.set(x, y, 0);
+                timeTicks.add(tick);
+            }
+        }
+        
+        // Create light particles
+        function createLightParticles() {
+            lightParticles.clear();
+            
+            const count = 100;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const radius = 10 + Math.random() * 10;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i3 + 2] = radius * Math.cos(phi);
+                
+                colors[i3] = 0.95;     // R
+                colors[i3 + 1] = 0.77; // G
+                colors[i3 + 2] = 0.06; // B
+            }
+            
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.8,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            const particleSystem = new THREE.Points(particles, material);
+            lightParticles.add(particleSystem);
+        }
+        
+        // Create electron field
+        function createElectronField() {
+            electronField.clear();
+            
+            const electronGeometry = new THREE.SphereGeometry(0.8, 8, 8);
+            const electronMaterial = new THREE.MeshStandardMaterial({
+                color: 0x2ecc71,
+                emissive: 0x1a8c4a,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            
+            const electronCount = 50;
+            for (let i = 0; i < electronCount; i++) {
+                const electron = new THREE.Mesh(electronGeometry, electronMaterial.clone());
+                
+                // Position electrons in a spherical distribution
+                const radius = 8 + Math.random() * 8;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                electron.position.set(
+                    radius * Math.sin(phi) * Math.cos(theta),
+                    radius * Math.sin(phi) * Math.sin(theta),
+                    radius * Math.cos(phi)
+                );
+                
+                electron.userData.originalPosition = electron.position.clone();
+                electron.userData.offset = Math.random() * Math.PI * 2;
+                electronField.add(electron);
+            }
+        }
+        
+        // Create DNA helix
+        function createDNAHelix() {
+            dnaHelix.clear();
+            
+            const radius = 2;
+            const height = 20;
+            const segments = 100;
+            const turns = 5;
+            
+            // Create backbone strands
+            const strandMaterial = new THREE.MeshBasicMaterial({ color: 0x9b59b6 });
+            const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x4a86e8 });
+            
+            for (let s = 0; s < 2; s++) {
+                const strandOffset = s * Math.PI;
+                
+                for (let i = 0; i < segments; i++) {
+                    const t = i / segments;
+                    const angle = t * Math.PI * 2 * turns;
+                    const y = (t - 0.5) * height;
+                    
+                    // Create backbone node
+                    const node = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.3, 8, 8),
+                        strandMaterial
+                    );
+                    node.position.x = radius * Math.cos(angle + strandOffset);
+                    node.position.y = y;
+                    node.position.z = radius * Math.sin(angle + strandOffset);
+                    dnaHelix.add(node);
+                    
+                    // Create base pairs
+                    if (i % 5 === 0) {
+                        const basePair = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.1, 0.1, radius * 1.8, 6),
+                            baseMaterial
+                        );
+                        basePair.position.y = y;
+                        basePair.rotation.z = angle + strandOffset + Math.PI/2;
+                        dnaHelix.add(basePair);
+                    }
+                }
+            }
+        }
+        
+        // Create heart rhythm visualization
+        function createHeartRhythm() {
+            heartRhythm.clear();
+            
+            const points = [];
+            const heartRate = parseInt(document.getElementById('heartRate').value);
+            const amplitude = 3;
+            const segments = 50;
+            
+            for (let i = 0; i < segments; i++) {
+                const x = (i - segments/2) * 0.5;
+                const y = Math.sin(i / segments * Math.PI * 4) * amplitude;
+                points.push(new THREE.Vector3(x, y, 0));
+            }
+            
+            const path = new THREE.CatmullRomCurve3(points);
+            const tubeGeometry = new THREE.TubeGeometry(path, segments, 0.3, 8, false);
+            
+            const heartMaterial = new THREE.MeshBasicMaterial({
+                color: 0xe74c3c,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            const heartTube = new THREE.Mesh(tubeGeometry, heartMaterial);
+            heartTube.position.y = -15;
+            heartTube.position.z = 5;
+            heartRhythm.add(heartTube);
+        }
+        
+        // Initialize all elements
+        createTimeTicks();
+        createLightParticles();
+        createElectronField();
+        createDNAHelix();
+        createHeartRhythm();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = document.querySelector('.simulation-area').offsetWidth / 
+                             document.querySelector('.simulation-area').offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(document.querySelector('.simulation-area').offsetWidth, 
+                            document.querySelector('.simulation-area').offsetHeight);
+        });
+        
+        // Animation variables
+        let time = 0;
+        let phase = 0; // 0: Primordial, 1: Time, 2: Light, 3: Electrons, 4: DNA, 5: Consciousness
+        let quantumTherapyActive = false;
+        
+        // Phase marker animation
+        function updatePhaseMarker() {
+            const marker = document.getElementById('phaseMarker');
+            const phaseBar = document.querySelector('.phase-bar');
+            const phaseWidth = phaseBar.offsetWidth;
+            
+            // Map phase to position (0-5 to 0-100%)
+            const position = (phase / 5) * phaseWidth;
+            marker.style.left = `${position}px`;
+            
+            // Update phase display
+            const phaseNames = [
+                "Primordial State (Ψ₀)",
+                "Time Tick Initiation (T)",
+                "Light Emergence (L)",
+                "Electron Excitation (ψ)",
+                "DNA Formation",
+                "Consciousness Field"
+            ];
+            document.getElementById('phaseDisplay').textContent = phaseNames[phase];
+        }
+        
+        // Update status display
+        function updateStatus() {
+            const statuses = [
+                "System Status: Primordial state Ψ₀. Time ticks initiating recursion...",
+                `System Status: Time ticks (T) disturbing primordial state at ${document.getElementById('timeTickValue').textContent}`,
+                `System Status: Light (L) emerging from time recursion. Energy: ${document.getElementById('lightEnergyValue').textContent}`,
+                `System Status: Electron wavefunctions (ψ) forming. Heart rhythm: ${document.getElementById('heartRateValue').textContent}`,
+                "System Status: DNA helix forming from time-light recursion",
+                quantumTherapyActive ? 
+                    "System Status: Quantum therapy active. Restoring coherence to biological systems" :
+                    "System Status: Consciousness field active. Observer effect modulating quantum states"
+            ];
+            document.getElementById('statusDisplay').textContent = statuses[phase];
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 0.01;
+            
+            // Update time ticks
+            timeTicks.children.forEach((tick, i) => {
+                const angle = (i / timeTicks.children.length) * Math.PI * 2;
+                const radius = 15 + Math.sin(time * 2 + i) * 2;
+                tick.position.x = Math.cos(angle) * radius;
+                tick.position.y = Math.sin(angle) * radius;
+                
+                // Pulsing effect
+                const scale = 0.8 + Math.sin(time * 10 + i) * 0.3;
+                tick.scale.set(scale, scale, scale);
+            });
+            
+            // Update light particles
+            if (lightParticles.children.length > 0) {
+                const particles = lightParticles.children[0];
+                const positions = particles.geometry.attributes.position.array;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    // Move particles in outward spiral
+                    positions[i] += positions[i] * 0.01;
+                    positions[i + 1] += positions[i + 1] * 0.01;
+                    positions[i + 2] += positions[i + 2] * 0.01;
+                    
+                    // Reset particles that go too far
+                    const distance = Math.sqrt(
+                        positions[i] * positions[i] +
+                        positions[i + 1] * positions[i + 1] +
+                        positions[i + 2] * positions[i + 2]
+                    );
+                    
+                    if (distance > 30) {
+                        positions[i] = (Math.random() - 0.5) * 5;
+                        positions[i + 1] = (Math.random() - 0.5) * 5;
+                        positions[i + 2] = (Math.random() - 0.5) * 5;
+                    }
+                }
+                
+                particles.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            // Update electron field
+            electronField.children.forEach(electron => {
+                const heartbeat = parseInt(document.getElementById('heartRate').value);
+                const amplitude = 1 + Math.sin(time * heartbeat * 0.01) * 0.5;
+                
+                // Pulsing effect based on heartbeat
+                electron.scale.set(amplitude, amplitude, amplitude);
+                
+                // Orbital motion
+                const orbitalRadius = 5 + Math.sin(time + electron.userData.offset) * 2;
+                electron.position.x = electron.userData.originalPosition.x + 
+                                      Math.cos(time + electron.userData.offset) * orbitalRadius;
+                electron.position.y = electron.userData.originalPosition.y + 
+                                      Math.sin(time * 0.7 + electron.userData.offset) * orbitalRadius;
+                electron.position.z = electron.userData.originalPosition.z + 
+                                      Math.cos(time * 1.2 + electron.userData.offset) * orbitalRadius;
+                
+                // Color variation
+                electron.material.emissive.setHSL(
+                    (Math.sin(time * 0.3 + electron.userData.offset) + 1) / 4,
+                    0.8,
+                    0.3
+                );
+            });
+            
+            // Update DNA helix
+            dnaHelix.rotation.y += 0.005;
+            dnaHelix.position.y = Math.sin(time) * 1;
+            
+            // Update heart rhythm
+            heartRhythm.rotation.y += 0.01;
+            
+            // Phase progression
+            if (time % 30 < 5) phase = 0;
+            else if (time % 30 < 10) phase = 1;
+            else if (time % 30 < 15) phase = 2;
+            else if (time % 30 < 20) phase = 3;
+            else if (time % 30 < 25) phase = 4;
+            else phase = 5;
+            
+            updatePhaseMarker();
+            updateStatus();
+            
+            // Rotate the entire scene
+            scene.rotation.y += 0.001;
+            
+            // Quantum therapy visualization
+            if (quantumTherapyActive) {
+                const therapyRadius = 10 + Math.sin(time * 5) * 3;
+                const therapyGeometry = new THREE.SphereGeometry(therapyRadius, 32, 32);
+                const therapyMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x00ff00,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                
+                const therapySphere = new THREE.Mesh(therapyGeometry, therapyMaterial);
+                scene.add(therapySphere);
+                
+                // Remove after animation frame
+                setTimeout(() => {
+                    scene.remove(therapySphere);
+                }, 50);
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Event listeners for controls
+        document.getElementById('timeTick').addEventListener('input', function() {
+            const value = 1 + parseFloat(this.value);
+            document.getElementById('timeTickValue').textContent = value.toFixed(1) + " THz";
+        });
+        
+        document.getElementById('lightEnergy').addEventListener('input', function() {
+            document.getElementById('lightEnergyValue').textContent = this.value + "%";
+            
+            // Adjust light intensity
+            if (lightParticles.children.length > 0) {
+                lightParticles.children[0].material.opacity = this.value / 100 * 0.7;
+            }
+        });
+        
+        document.getElementById('heartRate').addEventListener('input', function() {
+            document.getElementById('heartRateValue').textContent = this.value + " BPM";
+            createHeartRhythm();
+        });
+        
+        document.getElementById('quantumCoherence').addEventListener('input', function() {
+            document.getElementById('coherenceValue').textContent = this.value + "%";
+            
+            // Adjust electron stability
+            electronField.children.forEach(electron => {
+                electron.material.metalness = this.value / 100;
+            });
+        });
+        
+        document.getElementById('observeBtn').addEventListener('click', function() {
+            // Apply observer effect - temporarily increase coherence
+            const originalCoherence = document.getElementById('quantumCoherence').value;
+            document.getElementById('quantumCoherence').value = Math.min(100, parseInt(originalCoherence) + 20);
+            document.getElementById('coherenceValue').textContent = document.getElementById('quantumCoherence').value + "%";
+            
+            // Flash effect
+            scene.background = new THREE.Color(0x9b59b6);
+            setTimeout(() => {
+                scene.background = new THREE.Color(0x0a0c1a);
+            }, 200);
+            
+            // Reset after delay
+            setTimeout(() => {
+                document.getElementById('quantumCoherence').value = originalCoherence;
+                document.getElementById('coherenceValue').textContent = originalCoherence + "%";
+            }, 5000);
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            time = 0;
+            document.getElementById('timeTick').value = 37;
+            document.getElementById('lightEnergy').value = 70;
+            document.getElementById('heartRate').value = 72;
+            document.getElementById('quantumCoherence').value = 85;
+            quantumTherapyActive = false;
+            
+            document.getElementById('timeTickValue').textContent = "37.8 THz";
+            document.getElementById('lightEnergyValue').textContent = "70%";
+            document.getElementById('heartRateValue').textContent = "72 BPM";
+            document.getElementById('coherenceValue').textContent = "85%";
+            
+            createHeartRhythm();
+        });
+        
+        document.getElementById('quantumBtn').addEventListener('click', function() {
+            quantumTherapyActive = !quantumTherapyActive;
+            this.innerHTML = quantumTherapyActive ? 
+                '<span>⚛️</span> Stop Therapy' : 
+                '<span>⚛️</span> Quantum Therapy';
+        });
+        
+        // Start animation
+        animate();
+    </script>
 </body>
 </html>
