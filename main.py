@@ -5,20 +5,23 @@ from data_acquisition import DataAcquisition
 from metrics import Metrics
 from visualization import Visualization
 import time
+from matplotlib import plt  # Added for vis.ax4
+import datetime  # Added for datetime.now()
 
-def calibration_mode(model, metrics, data_acq, duration=300):  # 5 min
+def calibration_mode(metrics, data_acq, duration=300):  # Removed unused 'model' argument
+    # pylint: disable=unused-argument
     baseline_ci_t = 0
     baseline_sigma_h = 0
     baseline_lz_norm = 0
     start_time = time.time()
     samples = 0
     while time.time() - start_time < duration:
-        eeg_gamma, light_intensity, temperature, em_field, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data()
+        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data()  # Removed unused 'temperature', 'em_field'
         sigma_h = np.mean(eeg_gamma)
         vitality = metrics.compute_vitality(0.1, np.ones(100) * 0.5)
         entropy = metrics.calculate_information(eeg_gamma)
         info_energy = metrics.calculate_info_energy(eeg_gamma)
-        lz_norm = metrics.calculate_lz_norm(eeg_gamma)
+        lz_norm = metrics.calculate_lz_norm(eeg_gamma)  # Kept for potential future use
         phi_norm = metrics.calculate_phi(np.ones((100, 100)) * 0.5)  # Initial estimate
         ci_t = metrics.compute_ci_t(sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
         baseline_ci_t += ci_t
@@ -38,10 +41,11 @@ def main():
     task_mode = False
     log_file = "log.txt"
 
-    baseline_ci_t, baseline_sigma_h, baseline_lz_norm = calibration_mode(model, metrics, data_acq)
+    baseline_ci_t, baseline_sigma_h, baseline_lz_norm = calibration_mode(metrics, data_acq)
 
     def update(frame):
-        eeg_gamma, light_intensity, temperature, em_field, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data(task_mode)
+        # pylint: disable=unused-argument
+        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data(task_mode)  # Removed unused 'temperature', 'em_field'
         toxins = 0.1  # Placeholder, update with real toxin sensor if available
         atp_level = np.ones(100) * 0.5  # Placeholder, update with real ATP data
         node_states, edge_weights = model.update_dynamics(metrics.compute_vitality(toxins, atp_level), toxins)
@@ -49,7 +53,7 @@ def main():
         vitality = metrics.compute_vitality(toxins, atp_level)
         entropy = metrics.calculate_information(eeg_gamma)
         info_energy = metrics.calculate_info_energy(eeg_gamma)
-        lz_norm = metrics.calculate_lz_norm(eeg_gamma)
+        lz_norm = metrics.calculate_lz_norm(eeg_gamma)  # Kept for potential future use
         phi_norm = metrics.calculate_phi(edge_weights)
         ci_t = metrics.compute_ci_t(sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
         contributions = metrics.explain_ci_t(ci_t, sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
@@ -85,11 +89,10 @@ def main():
                         [p[2] for p in model.pos.values()], c=node_states, cmap=plt.cm.viridis, s=200)
 
         vis.update_contributions(contributions)
-        state = 'Conscious' if ci_t > 0.8 else 'Unconscious'
         status_text = f"Light Pulse: {'ON' if THz_resonance else 'OFF'} | Magnetic Field: {'ON' if magnetic_field else 'OFF'} | Task: {'ON' if task_mode else 'OFF'}\nHarmony: {sigma_h:.2f} | CI(t): {ci_t:.2f} | Phi: {phi_norm:.2f}\nInfo Energy: {info_energy:.2e} J | Decay Rate: {np.mean(edge_weights):.2f}\nGCS: {gcs_score:.2f} | ρ_PCI: {rho_pci:.2f} | ρ_CRS-R: {rho_crs_r:.2f} | ρ_GCS: {rho_gcs:.2f}"
         clean_status = status_text.replace('\n', ' | ')
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(log_file, "a") as f:
+        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
             f.write(f"{timestamp} | {clean_status} | Contributions: {contributions}\n")
         vis.update_status(status_text)
         vis.save_frame()
@@ -98,24 +101,24 @@ def main():
     def toggle_thz():
         nonlocal THz_resonance
         THz_resonance = not THz_resonance
-        with open(log_file, "a") as f:
+        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Light Pulse toggled to {'ON' if THz_resonance else 'OFF'}\n")
 
     def toggle_mag():
         nonlocal magnetic_field
         magnetic_field = not magnetic_field
-        with open(log_file, "a") as f:
+        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Magnetic Field toggled to {'ON' if magnetic_field else 'OFF'}\n")
 
     def toggle_task():
         nonlocal task_mode
         task_mode = not task_mode
-        with open(log_file, "a") as f:
+        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 2-back Task toggled to {'ON' if task_mode else 'OFF'}\n")
 
     def calibrate():
         nonlocal baseline_ci_t, baseline_sigma_h, baseline_lz_norm
-        baseline_ci_t, baseline_sigma_h, baseline_lz_norm = calibration_mode(model, metrics, data_acq)
+        baseline_ci_t, baseline_sigma_h, baseline_lz_norm = calibration_mode(metrics, data_acq)
 
     vis.thz_button.clicked.connect(toggle_thz)
     vis.mag_button.clicked.connect(toggle_mag)
