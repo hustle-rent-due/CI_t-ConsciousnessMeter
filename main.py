@@ -86,10 +86,10 @@ def main():
 
         vis.update_contributions(contributions)
         state = 'Conscious' if ci_t > 0.8 else 'Unconscious'
-        status_text = (f'Light Pulse: {"ON" if THz_resonance else "OFF"} | Magnetic Field: {"ON" if magnetic_field else "OFF"} | Task: {"ON" if task_mode else "OFF"}\n'
-                       f'Harmony: {sigma_h:.2f} | CI(t): {ci_t:.2f} | Phi: {phi_norm:.2f}\n'
-                       f'Info Energy: {info_energy:.2e} J | Decay Rate: {np.mean(edge_weights):.2f}\n'
-                       f'GCS: {gcs_score:.2f} | ρ_PCI: {rho_pci:.2f} | ρ_CRS-R: {rho_crs_r:.2f} | ρ_GCS: {rho_gcs:.2f}')
+        status_text = (f"Light Pulse: {'ON' if THz_resonance else 'OFF'} | Magnetic Field: {'ON' if magnetic_field else 'OFF'} | Task: {'ON' if task_mode else 'OFF'}\n"
+                       f"Harmony: {sigma_h:.2f} | CI(t): {ci_t:.2f} | Phi: {phi_norm:.2f}\n"
+                       f"Info Energy: {info_energy:.2e} J | Decay Rate: {np.mean(edge_weights):.2f}\n"
+                       f"GCS: {gcs_score:.2f} | ρ_PCI: {rho_pci:.2f} | ρ_CRS-R: {rho_crs_r:.2f} | ρ_GCS: {rho_gcs:.2f}")
         vis.update_status(status_text)
         with open(log_file, "a") as f:
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {status_text.replace('\n', ' | ')} | Contributions: {contributions}\n")
