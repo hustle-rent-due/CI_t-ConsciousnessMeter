@@ -5,8 +5,8 @@ from data_acquisition import DataAcquisition
 from metrics import Metrics
 from visualization import Visualization
 import time
-from matplotlib import plt  # Added for vis.ax4
-import datetime  # Added for datetime.now()
+import matplotlib.pyplot as plt  # Corrected import
+import datetime
 
 def calibration_mode(metrics, data_acq, duration=300):  # Removed unused 'model' argument
     # pylint: disable=unused-argument
@@ -92,7 +92,7 @@ def main():
         status_text = f"Light Pulse: {'ON' if THz_resonance else 'OFF'} | Magnetic Field: {'ON' if magnetic_field else 'OFF'} | Task: {'ON' if task_mode else 'OFF'}\nHarmony: {sigma_h:.2f} | CI(t): {ci_t:.2f} | Phi: {phi_norm:.2f}\nInfo Energy: {info_energy:.2e} J | Decay Rate: {np.mean(edge_weights):.2f}\nGCS: {gcs_score:.2f} | ρ_PCI: {rho_pci:.2f} | ρ_CRS-R: {rho_crs_r:.2f} | ρ_GCS: {rho_gcs:.2f}"
         clean_status = status_text.replace('\n', ' | ')
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
+        with open(log_file, "a", encoding='utf-8') as f:
             f.write(f"{timestamp} | {clean_status} | Contributions: {contributions}\n")
         vis.update_status(status_text)
         vis.save_frame()
@@ -101,19 +101,19 @@ def main():
     def toggle_thz():
         nonlocal THz_resonance
         THz_resonance = not THz_resonance
-        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
+        with open(log_file, "a", encoding='utf-8') as f:
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Light Pulse toggled to {'ON' if THz_resonance else 'OFF'}\n")
 
     def toggle_mag():
         nonlocal magnetic_field
         magnetic_field = not magnetic_field
-        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
+        with open(log_file, "a", encoding='utf-8') as f:
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Magnetic Field toggled to {'ON' if magnetic_field else 'OFF'}\n")
 
     def toggle_task():
         nonlocal task_mode
         task_mode = not task_mode
-        with open(log_file, "a", encoding='utf-8') as f:  # Added encoding
+        with open(log_file, "a", encoding='utf-8') as f:
             f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 2-back Task toggled to {'ON' if task_mode else 'OFF'}\n")
 
     def calibrate():
@@ -129,8 +129,6 @@ def main():
     from matplotlib.animation import FuncAnimation
     ani = FuncAnimation(vis.fig, update, interval=33, cache_frame_data=False)  # ~30 Hz
     vis.show()
-    import sys
-    from PyQt5.QtWidgets import QApplication
     app = QApplication(sys.argv)
     app.exec_()
     data_acq.cleanup()
