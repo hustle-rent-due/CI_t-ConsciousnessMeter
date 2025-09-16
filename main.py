@@ -1,15 +1,16 @@
 # main.py
 import sys
 import numpy as np
+import time
+import datetime
+import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
+from matplotlib.animation import FuncAnimation
+
 from network_model import NetworkModel
 from data_acquisition import DataAcquisition
 from metrics import Metrics
 from visualization import Visualization
-import time
-import matplotlib.pyplot as plt
-import datetime
-from matplotlib.animation import FuncAnimation
 
 def calibration_mode(metrics, data_acq, duration=300):
     baseline_ci_t = 0
@@ -34,7 +35,7 @@ def calibration_mode(metrics, data_acq, duration=300):
     return baseline_ci_t / samples, baseline_sigma_h / samples, baseline_lz_norm / samples
 
 def main():
-    app = QApplication(sys.argv)  # ✅ Must come first
+    app = QApplication(sys.argv)  # ✅ Must be first
 
     model = NetworkModel()
     data_acq = DataAcquisition()
@@ -136,3 +137,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
