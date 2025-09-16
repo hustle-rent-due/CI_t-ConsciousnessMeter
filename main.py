@@ -1,37 +1,41 @@
 # main.py
+import sys
 import numpy as np
+from PyQt5.QtWidgets import QApplication
 from network_model import NetworkModel
 from data_acquisition import DataAcquisition
 from metrics import Metrics
 from visualization import Visualization
 import time
-import matplotlib.pyplot as plt  # Corrected import
+import matplotlib.pyplot as plt
 import datetime
+from matplotlib.animation import FuncAnimation
 
-def calibration_mode(metrics, data_acq, duration=300):  # Removed unused 'model' argument
-    # pylint: disable=unused-argument
+def calibration_mode(metrics, data_acq, duration=300):
     baseline_ci_t = 0
     baseline_sigma_h = 0
     baseline_lz_norm = 0
     start_time = time.time()
     samples = 0
     while time.time() - start_time < duration:
-        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data()  # Removed unused 'temperature', 'em_field'
+        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data()
         sigma_h = np.mean(eeg_gamma)
         vitality = metrics.compute_vitality(0.1, np.ones(100) * 0.5)
         entropy = metrics.calculate_information(eeg_gamma)
         info_energy = metrics.calculate_info_energy(eeg_gamma)
-        lz_norm = metrics.calculate_lz_norm(eeg_gamma)  # Kept for potential future use
-        phi_norm = metrics.calculate_phi(np.ones((100, 100)) * 0.5)  # Initial estimate
+        lz_norm = metrics.calculate_lz_norm(eeg_gamma)
+        phi_norm = metrics.calculate_phi(np.ones((100, 100)) * 0.5)
         ci_t = metrics.compute_ci_t(sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
         baseline_ci_t += ci_t
         baseline_sigma_h += sigma_h
         baseline_lz_norm += lz_norm
         samples += 1
-        time.sleep(0.033)  # ~30 Hz update
+        time.sleep(0.033)
     return baseline_ci_t / samples, baseline_sigma_h / samples, baseline_lz_norm / samples
 
 def main():
+    app = QApplication(sys.argv)  # ✅ Must come first
+
     model = NetworkModel()
     data_acq = DataAcquisition()
     metrics = Metrics()
@@ -44,24 +48,23 @@ def main():
     baseline_ci_t, baseline_sigma_h, baseline_lz_norm = calibration_mode(metrics, data_acq)
 
     def update(frame):
-        # pylint: disable=unused-argument
-        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data(task_mode)  # Removed unused 'temperature', 'em_field'
-        toxins = 0.1  # Placeholder, update with real toxin sensor if available
-        atp_level = np.ones(100) * 0.5  # Placeholder, update with real ATP data
+        eeg_gamma, light_intensity, _, _, fmri_fc, fnirs_hb, meg_coh = data_acq.acquire_data(task_mode)
+        toxins = 0.1
+        atp_level = np.ones(100) * 0.5
         node_states, edge_weights = model.update_dynamics(metrics.compute_vitality(toxins, atp_level), toxins)
         sigma_h = np.mean(eeg_gamma)
         vitality = metrics.compute_vitality(toxins, atp_level)
         entropy = metrics.calculate_information(eeg_gamma)
         info_energy = metrics.calculate_info_energy(eeg_gamma)
-        lz_norm = metrics.calculate_lz_norm(eeg_gamma)  # Kept for potential future use
+        lz_norm = metrics.calculate_lz_norm(eeg_gamma)
         phi_norm = metrics.calculate_phi(edge_weights)
         ci_t = metrics.compute_ci_t(sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
         contributions = metrics.explain_ci_t(ci_t, sigma_h, vitality, light_intensity, entropy, info_energy, phi_norm, fmri_fc, fnirs_hb, meg_coh)
         gcs_score = metrics.map_to_gcs(ci_t)
-        rho_pci, rho_crs_r, rho_gcs = metrics.validate_ci_t(ci_t, 0.7, 18, gcs_score)  # Placeholder ground truth
+        rho_pci, rho_crs_r, rho_gcs = metrics.validate_ci_t(ci_t, 0.7, 18, gcs_score)
 
         vis.atp_level = np.roll(vis.atp_level, -1)
-        vis.atp_level[-1] = atp_level.mean() if atp_level.size else 0.5
+        vis.atp_level[-1] = atp_level.mean()
         vis.line.set_ydata(vis.atp_level)
         vis.contrast_level = np.roll(vis.contrast_level, -1)
         vis.contrast_level[-1] = light_intensity
@@ -126,11 +129,9 @@ def main():
     vis.save_button.clicked.connect(vis.save_outputs)
     vis.calibrate_button.clicked.connect(calibrate)
 
-    from matplotlib.animation import FuncAnimation
-    ani = FuncAnimation(vis.fig, update, interval=33, cache_frame_data=False)  # ~30 Hz
+    ani = FuncAnimation(vis.fig, update, interval=33, cache_frame_data=False)
     vis.show()
-    app = QApplication(sys.argv)
-    app.exec_()
+    sys.exit(app.exec_())
     data_acq.cleanup()
 
 if __name__ == "__main__":
