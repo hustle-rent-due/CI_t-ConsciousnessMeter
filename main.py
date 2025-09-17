@@ -133,7 +133,7 @@ def main():
     vis.calibrate_button.clicked.connect(calibrate)
 
     ani = FuncAnimation(vis.fig, update, interval=33, cache_frame_data=False)
-    vis.show()
+    vis.widget.showMaximized()  # ✅ Final fix: show the QWidget directly
     sys.exit(app.exec_())
     data_acq.cleanup()
 
