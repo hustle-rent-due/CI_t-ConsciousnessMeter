@@ -12,25 +12,24 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 import numpy as np
 import datetime
 
-class Visualization(QWidget):
+class Visualization:
     def __init__(self):
-        super().__init__()
-        self.initialized = False  # ✅ Delay GUI construction
+        self.initialized = False
+        self.widget = None  # ✅ Delay QWidget creation
         self.frames = []
 
     def build_gui(self):
         if self.initialized:
             return
 
-        self.setWindowTitle("Consciousness Meter")
-        self.setGeometry(100, 100, 1200, 800)
-        self.layout = QVBoxLayout(self)
+        self.widget = QWidget()
+        self.widget.setWindowTitle("Consciousness Meter")
+        self.widget.setGeometry(100, 100, 1200, 800)
+        self.layout = QVBoxLayout(self.widget)
 
-        # Status label
         self.status_label = QLabel("Status: Initializing...")
         self.layout.addWidget(self.status_label)
 
-        # Buttons
         self.thz_button = QPushButton("Toggle THz")
         self.mag_button = QPushButton("Toggle Magnetic")
         self.task_button = QPushButton("Toggle 2-back")
@@ -39,12 +38,10 @@ class Visualization(QWidget):
         for btn in [self.thz_button, self.mag_button, self.task_button, self.save_button, self.calibrate_button]:
             self.layout.addWidget(btn)
 
-        # Figure and canvas
         self.fig = plt.figure(figsize=(10, 12))
         self.canvas = FigureCanvas(self.fig)
         self.layout.addWidget(self.canvas)
 
-        # Subplots
         gs = self.fig.add_gridspec(7, 1, height_ratios=[2, 2, 2, 2, 2, 1, 1])
         self.ax1 = self.fig.add_subplot(gs[0])
         self.ax2 = self.fig.add_subplot(gs[1])
@@ -54,7 +51,6 @@ class Visualization(QWidget):
         self.ax6 = self.fig.add_subplot(gs[5])
         self.ax7 = self.fig.add_subplot(gs[6])
 
-        # Data buffers
         self.atp_level = np.zeros(250)
         self.contrast_level = np.zeros(250)
         self.ci_level = np.zeros(250)
@@ -62,7 +58,6 @@ class Visualization(QWidget):
         self.info_energy_level = np.zeros(250)
         self.decay_level = np.zeros(250)
 
-        # Plot lines
         self.line, = self.ax1.plot(self.atp_level)
         self.contrast_line, = self.ax2.plot(self.contrast_level)
         self.ci_line, = self.ax3.plot(self.ci_level)
@@ -70,11 +65,9 @@ class Visualization(QWidget):
         self.info_energy_line, = self.ax5.plot(self.info_energy_level)
         self.decay_line, = self.ax6.plot(self.decay_level)
 
-        # Contribution bars
         self.contrib_bars = self.ax7.bar(range(9), np.zeros(9))
         self.ax7.set_ylim(0, 1)
 
-        # Axis titles
         self.ax1.set_title("ATP Level")
         self.ax2.set_title("Light Intensity")
         self.ax3.set_title("CI(t)")
@@ -83,7 +76,6 @@ class Visualization(QWidget):
         self.ax6.set_title("Decay Rate")
         self.ax7.set_title("Contributions")
 
-        # Axis limits
         for ax in [self.ax1, self.ax2, self.ax3, self.ax4, self.ax5, self.ax6]:
             ax.set_xlim(0, 250)
             ax.set_ylim(0, 1)
@@ -110,7 +102,8 @@ class Visualization(QWidget):
         print(f"Saved output to output_{timestamp}.png")
 
     def show(self):
-        self.showMaximized()
+        self.widget.showMaximized()
+
 
 
 
