@@ -1,4 +1,3 @@
-# main.py
 import sys
 import numpy as np
 import time
@@ -40,7 +39,10 @@ def main():
     model = NetworkModel()
     data_acq = DataAcquisition()
     metrics = Metrics()
+
     vis = Visualization()
+    vis.build_gui()  # ✅ Safely construct GUI after QApplication
+
     THz_resonance = False
     magnetic_field = False
     task_mode = False
@@ -137,4 +139,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
