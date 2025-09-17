@@ -94,8 +94,3 @@ class Visualization(QMainWindow):
     def show(self):
         self.showMaximized()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = Visualization()
-    window.show()
-    sys.exit(app.exec_())
