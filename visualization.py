@@ -46,7 +46,7 @@ class Visualization:
         self.ax1 = self.fig.add_subplot(gs[0])
         self.ax2 = self.fig.add_subplot(gs[1])
         self.ax3 = self.fig.add_subplot(gs[2])
-        self.ax4 = self.fig.add_subplot(gs[3], projection='3d')
+        self.ax4 = self.fig.add_subplot(gs[3], projection='3d')  # ✅ 3D axis for phi_level
         self.ax5 = self.fig.add_subplot(gs[4])
         self.ax6 = self.fig.add_subplot(gs[5])
         self.ax7 = self.fig.add_subplot(gs[6])
@@ -61,7 +61,19 @@ class Visualization:
         self.line, = self.ax1.plot(self.atp_level)
         self.contrast_line, = self.ax2.plot(self.contrast_level)
         self.ci_line, = self.ax3.plot(self.ci_level)
-        self.phi_line, = self.ax4.plot(self.phi_level)
+
+        # ✅ 3D phi_level plot
+        x = np.arange(len(self.phi_level))
+        y = np.zeros(len(self.phi_level))
+        z = self.phi_level
+        self.phi_line, = self.ax4.plot(x, y, z, color='purple')
+        self.ax4.set_xlabel("Δx = Time")
+        self.ax4.set_ylabel("Δt = Recursion")
+        self.ax4.set_zlabel("Φ = Emergence")
+        self.ax4.set_xlim(0, len(self.phi_level))
+        self.ax4.set_ylim(-1, 1)
+        self.ax4.set_zlim(0, 1)
+
         self.info_energy_line, = self.ax5.plot(self.info_energy_level)
         self.decay_line, = self.ax6.plot(self.decay_level)
 
@@ -71,12 +83,12 @@ class Visualization:
         self.ax1.set_title("ATP Level")
         self.ax2.set_title("Light Intensity")
         self.ax3.set_title("CI(t)")
-        self.ax4.set_title("Phi")
+        self.ax4.set_title("Phi Level (3D)")
         self.ax5.set_title("Info Energy")
         self.ax6.set_title("Decay Rate")
         self.ax7.set_title("Contributions")
 
-        for ax in [self.ax1, self.ax2, self.ax3, self.ax4, self.ax5, self.ax6]:
+        for ax in [self.ax1, self.ax2, self.ax3, self.ax5, self.ax6]:
             ax.set_xlim(0, 250)
             ax.set_ylim(0, 1)
 
