@@ -34,14 +34,14 @@ def calibration_mode(metrics, data_acq, duration=300):
     return baseline_ci_t / samples, baseline_sigma_h / samples, baseline_lz_norm / samples
 
 def main():
-    app = QApplication(sys.argv)  # ✅ Must be first
+    app = QApplication(sys.argv)
 
     model = NetworkModel()
     data_acq = DataAcquisition()
     metrics = Metrics()
 
     vis = Visualization()
-    vis.build_gui()  # ✅ Safely construct GUI after QApplication
+    vis.build_gui()
 
     THz_resonance = False
     magnetic_field = False
@@ -69,40 +69,62 @@ def main():
         vis.atp_level = np.roll(vis.atp_level, -1)
         vis.atp_level[-1] = atp_level.mean()
         vis.line.set_ydata(vis.atp_level)
+
         vis.contrast_level = np.roll(vis.contrast_level, -1)
         vis.contrast_level[-1] = light_intensity
         vis.contrast_line.set_ydata(vis.contrast_level)
+
         vis.ci_level = np.roll(vis.ci_level, -1)
         vis.ci_level[-1] = ci_t
         vis.ci_line.set_ydata(vis.ci_level)
+
         vis.phi_level = np.roll(vis.phi_level, -1)
         vis.phi_level[-1] = phi_norm
-        vis.phi_line.set_ydata(vis.phi_level)
+
+        # ✅ Refresh 3D phi plot
+        x = np.arange(len(vis.phi_level))
+        y = np.zeros(len(vis.phi_level))
+        z = vis.phi_level
+        vis.ax4.clear()
+        vis.phi_line, = vis.ax4.plot(x, y, z, color='purple')
+        vis.ax4.set_xlabel("Δx = Time")
+        vis.ax4.set_ylabel("Δt = Recursion")
+        vis.ax4.set_zlabel("Φ = Emergence")
+        vis.ax4.set_xlim(0, len(vis.phi_level))
+        vis.ax4.set_ylim(-1, 1)
+        vis.ax4.set_zlim(0, 1)
+
         vis.info_energy_level = np.roll(vis.info_energy_level, -1)
         vis.info_energy_level[-1] = info_energy
         vis.info_energy_line.set_ydata(vis.info_energy_level)
+
         vis.decay_level = np.roll(vis.decay_level, -1)
         vis.decay_level[-1] = np.mean(edge_weights)
         vis.decay_line.set_ydata(vis.decay_level)
 
-        vis.ax4.clear()
+        vis.ax4.scatter([p[0] for p in model.pos.values()],
+                        [p[1] for p in model.pos.values()],
+                        [p[2] for p in model.pos.values()],
+                        c=node_states, cmap=plt.cm.viridis, s=200)
+
         for i, j in model.G.edges():
             x_line = [model.pos[i][0], model.pos[j][0]]
             y_line = [model.pos[i][1], model.pos[j][1]]
             z_line = [model.pos[i][2], model.pos[j][2]]
             vis.ax4.plot(x_line, y_line, z_line, 'k-', alpha=edge_weights[i, j], linewidth=edge_weights[i, j] * 3)
-        vis.ax4.scatter([p[0] for p in model.pos.values()], [p[1] for p in model.pos.values()],
-                        [p[2] for p in model.pos.values()], c=node_states, cmap=plt.cm.viridis, s=200)
 
         vis.update_contributions(contributions)
+
         status_text = f"Light Pulse: {'ON' if THz_resonance else 'OFF'} | Magnetic Field: {'ON' if magnetic_field else 'OFF'} | Task: {'ON' if task_mode else 'OFF'}\nHarmony: {sigma_h:.2f} | CI(t): {ci_t:.2f} | Phi: {phi_norm:.2f}\nInfo Energy: {info_energy:.2e} J | Decay Rate: {np.mean(edge_weights):.2f}\nGCS: {gcs_score:.2f} | ρ_PCI: {rho_pci:.2f} | ρ_CRS-R: {rho_crs_r:.2f} | ρ_GCS: {rho_gcs:.2f}"
         clean_status = status_text.replace('\n', ' | ')
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(log_file, "a", encoding='utf-8') as f:
             f.write(f"{timestamp} | {clean_status} | Contributions: {contributions}\n")
+
         vis.update_status(status_text)
         vis.save_frame()
-        return [vis.line, vis.contrast_line, vis.ci_line, vis.phi_line, vis.info_energy_line, vis.decay_line] + list(vis.contrib_bars)
+
+        return [vis.line, vis.contrast_line, vis.ci_line, vis.info_energy_line, vis.decay_line] + list(vis.contrib_bars)
 
     def toggle_thz():
         nonlocal THz_resonance
@@ -133,9 +155,11 @@ def main():
     vis.calibrate_button.clicked.connect(calibrate)
 
     ani = FuncAnimation(vis.fig, update, interval=33, cache_frame_data=False)
-    vis.widget.showMaximized()  # ✅ Final fix: show the QWidget directly
+    vis.widget.showMaximized()
     sys.exit(app.exec_())
     data_acq.cleanup()
 
 if __name__ == "__main__":
     main()
+
+
