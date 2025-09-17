@@ -1,26 +1,26 @@
-# visualization.py
 """
 Visualization module for Consciousness Meter, displaying CI(t), ATP, and network dynamics.
 """
 
-import matplotlib
-matplotlib.use("Qt5Agg")  # ✅ Force Qt backend
-
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 import numpy as np
 import datetime
 
 class Visualization:
     def __init__(self):
         self.initialized = False
-        self.widget = None  # ✅ Delay QWidget creation
+        self.widget = None
         self.frames = []
 
     def build_gui(self):
         if self.initialized:
             return
+
+        # ✅ Delay Qt and Matplotlib imports until after QApplication is alive
+        import matplotlib
+        matplotlib.use("Qt5Agg")
+        import matplotlib.pyplot as plt
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+        from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 
         self.widget = QWidget()
         self.widget.setWindowTitle("Consciousness Meter")
@@ -103,6 +103,8 @@ class Visualization:
 
     def show(self):
         self.widget.showMaximized()
+
+
 
 
 
