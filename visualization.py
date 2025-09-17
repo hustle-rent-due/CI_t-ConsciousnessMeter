@@ -12,13 +12,18 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 import numpy as np
 import datetime
 
-class Visualization(QWidget):  # ✅ Subclass QWidget
+class Visualization(QWidget):
     def __init__(self):
         super().__init__()
+        self.initialized = False  # ✅ Delay GUI construction
+        self.frames = []
+
+    def build_gui(self):
+        if self.initialized:
+            return
+
         self.setWindowTitle("Consciousness Meter")
         self.setGeometry(100, 100, 1200, 800)
-
-        # Layout
         self.layout = QVBoxLayout(self)
 
         # Status label
@@ -78,12 +83,12 @@ class Visualization(QWidget):  # ✅ Subclass QWidget
         self.ax6.set_title("Decay Rate")
         self.ax7.set_title("Contributions")
 
-        # Set axis limits
+        # Axis limits
         for ax in [self.ax1, self.ax2, self.ax3, self.ax4, self.ax5, self.ax6]:
             ax.set_xlim(0, 250)
             ax.set_ylim(0, 1)
 
-        self.frames = []
+        self.initialized = True
 
     def update_status(self, text):
         self.status_label.setText(f"Status: {text}")
@@ -106,5 +111,6 @@ class Visualization(QWidget):  # ✅ Subclass QWidget
 
     def show(self):
         self.showMaximized()
+
 
 
